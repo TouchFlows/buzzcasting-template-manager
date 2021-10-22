@@ -1,4 +1,4 @@
-# Grapesjs Project Manager
+# BuzzCasting Presentation Manager
 
 > Requires GrapesJS v0.17.3 or higher.
 
