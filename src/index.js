@@ -7,6 +7,8 @@ export default (editor, opts = {}) => {
     const options = {
         ...{
             // default options
+            // Allow migration of projects using deprecated storage prefix
+            legacyPrefix: '',
             // Database name
             dbName: 'gjs',
 
@@ -16,25 +18,55 @@ export default (editor, opts = {}) => {
             // Load first template in storage
             loadFirst: true,
 
+            // Custom load
+            customLoad: false,
+
             // Add uuid as path parameter to store path for rest-api
             uuidInPath: true,
 
             // Indexeddb version schema
-            indexeddbVersion: 5,
+            indexeddbVersion: 6,
+
+            // Confirm delete project
+            confirmDeleteProject() {
+                return confirm('Are you sure to delete this project')
+            },
+
+            // Confirm delete page
+            confirmDeletePage() {
+                return confirm('Are you sure to delete this page')
+            },
 
             // When template or page is deleted
             onDelete(res) {
                 console.log('Deleted:', res)
             },
 
-            // When error onDelete
-            onDeleteError(err) {
-                console.log(err)
+            // Handle promise from delete
+            onDeleteAsync(del) {
+                return del;
+            },
+
+            // Handle promise from update
+            onUpdateAsync(up) {
+                return up;
+            },
+
+            // Handle promise from screenshot
+            onScreenshotAsync(shot) {
+                return shot;
             },
 
             // On screenshot error
             onScreenshotError(err) {
                 console.log(err)
+            },
+
+            // Handle built-in thumbnail generation
+            // By default it just sets the url as the base64 encoded image which may be too large to store in a database
+            // You might want to upload this somewhere
+            onThumbnail(dataUrl, $input) {
+                $input.val(dataUrl);
             },
 
             // Quality of screenshot image from 0 to 1, more quality increases the image size
@@ -94,22 +126,25 @@ export default (editor, opts = {}) => {
     storage(editor, options);
 
     // Load page with index zero
-    editor.on('load', () => {
+    editor.on('load', async () => {
         const cs = editor.Storage.getCurrentStorage();
-        cs.loadAll(res => {
+        const { customLoad } = options;
+        customLoad && typeof customLoad === 'function' && customLoad(editor, cs);
+        if (!customLoad) {
+            const res = await cs.loadAll();
             const firstPage = res[0];
             if (firstPage && options.loadFirst) {
                 cs.setId(firstPage.id);
                 cs.setName(firstPage.name);
                 cs.setThumbnail(firstPage.thumbnail);
                 cs.setIsTemplate(firstPage.template);
-                editor.load();
+                await editor.load();
+                editor.stopCommand('sw-visibility');
+                editor.runCommand('sw-visibility');
             } else {
                 cs.setId(editor.runCommand('get-uuidv4'));
                 cs.setName(`Default-${cs.currentId.substr(0, 7)}`);
-                options.components && editor.setComponents(options.components);
-                options.style && editor.setStyle(options.style);
             }
-        });
+        }
     });
 };
