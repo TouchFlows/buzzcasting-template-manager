@@ -1,4 +1,4 @@
-export default function timeago(date, short) {
+export default function timeago(date: string | number | Date, short: boolean | undefined = undefined) {
     const obj = {
         second: 1000,
         minute: 60 * 1000,
@@ -9,9 +9,9 @@ export default function timeago(date, short) {
         year: 365 * 24 * 60 * 1000 * 60,
     }
 
-    const { round } = Math,
+    let { round } = Math,
         dir = ' ago',
-        pl = function (v, n) {
+        pl = function (v: string, n: number) {
             return (short === undefined) ? `${n} ${v + (n > 1 ? 's' : '') + dir}` : n + v.substring(0, 1)
         },
         ts = Date.now() - new Date(date).getTime();
@@ -23,8 +23,10 @@ export default function timeago(date, short) {
     }
 
     for (var i in obj) {
+        // @ts-ignore
         if (round(ts) < obj[i]) return pl(ii || 'm', round(ts / (obj[ii] || 1)))
         ii = i;
     }
+    // @ts-ignore
     return pl(i, round(ts / obj[i]));
 }

@@ -1,16 +1,16 @@
 // https://github.com/netlify-labs/oauth-example/blob/master/src/utils/sort.js
 // License MIT
-import objSize from './objsize';
+import objSize from '@/utils/objsize';
 
-export function matchText(search, text) {
+export function matchText(search: string, text: string) {
     if (!text || !search) {
         return false
     }
     return text.toLowerCase().indexOf(search.toLowerCase()) > -1
 }
 
-export function sortByDate(dateType, order) {
-    return function (a, b) {
+export function sortByDate(dateType: string | number, order: string) {
+    return function (a: { [x: string]: string | number | Date; }, b: { [x: string]: string | number | Date; }) {
         const timeA = new Date(a[dateType]).getTime()
         const timeB = new Date(b[dateType]).getTime()
         if (order === 'asc') {
@@ -21,8 +21,8 @@ export function sortByDate(dateType, order) {
     }
 }
 
-export function sortByName(key, order) {
-    return function (a, b) {
+export function sortByName(key: string | number, order: string) {
+    return function (a: { [x: string]: number; }, b: { [x: string]: number; }) {
         if (order === 'asc') {
             if (a[key] < b[key]) return -1
             if (a[key] > b[key]) return 1
@@ -33,8 +33,8 @@ export function sortByName(key, order) {
     }
 }
 
-export function sortByPages(key, order) {
-    return function (a, b) {
+export function sortByPages(key: string | number, order: string) {
+    return function (a: { [x: string]: string; }, b: { [x: string]: string; }) {
         const pagesA = JSON.parse(a[key]);
         const pagesB = JSON.parse(b[key]);
         if (order === 'desc') {
@@ -47,8 +47,8 @@ export function sortByPages(key, order) {
     }
 }
 
-export function sortBySize(order) {
-    return function (a, b) {
+export function sortBySize(order: string) {
+    return function (a: any, b: any) {
         const sizeA = objSize(a);
         const sizeB = objSize(b);
         if (order === 'asc') {

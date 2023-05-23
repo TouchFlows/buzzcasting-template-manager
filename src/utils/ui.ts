@@ -1,8 +1,20 @@
+import { Editor, IStorage, StorageOptions } from "grapesjs";
+
 export default class UI {
-    constructor(editor, opts = {}) {
+    editor: Editor
+    pfx: string
+    state: any
+    $el: any
+    $: any
+    opts: any
+    
+    constructor(editor: Editor, opts = {}) {
         this.editor = editor;
+        // @ts-ignore
         this.$ = editor.$;
+        // @ts-ignore
         this.pfx = editor.getConfig('stylePrefix');
+        // @ts-ignore
         this.opts = opts;
         this.setState = this.setState.bind(this);
         this.setStateSilent = this.setStateSilent.bind(this);
@@ -10,24 +22,31 @@ export default class UI {
         this.handleTabs = this.handleTabs.bind(this);
     }
 
-    setState(state) {
+    setState(state: any) {
+        // @ts-ignore
         this.state = { ...this.state, ...state };
+        // @ts-ignore
         this.update();
     }
 
-    setStateSilent(state) {
+    setStateSilent(state: any) {
+        // @ts-ignore
         this.state = { ...this.state, ...state };
     }
 
-    get sm() {
+    // @ts-ignore
+    get sm(): StorageManager {
+        // @ts-ignore
         return this.editor.Storage;
     }
 
-    get cs() {
+    // @ts-ignore
+    get cs(): IStorage<StorageOptions>{
         return this.editor.Storage.getCurrentStorage();
     }
 
-    get pm() {
+    // @ts-ignore
+    get pm(): any {
         return this.editor.Pages;
     }
 

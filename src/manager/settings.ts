@@ -1,7 +1,8 @@
-import UI from '../utils/ui';
+import { Editor } from 'grapesjs';
+import UI from '@/utils/ui';
 
 export default class SettingsApp extends UI {
-    constructor(editor, opts = {}) {
+    constructor(editor: Editor, opts = {}) {
         super(editor, opts);
         this.handleSave = this.handleSave.bind(this);
         this.handleThumbnail = this.handleThumbnail.bind(this);
@@ -14,7 +15,7 @@ export default class SettingsApp extends UI {
         };
     }
 
-    setTab(tab) {
+    setTab(tab: any) {
         this.state.tab = tab;
     }
 
@@ -36,35 +37,40 @@ export default class SettingsApp extends UI {
         });
     }
 
-    handleSave(e) {
+    handleSave(_e: CustomEvent) {
         const { $el, editor } = this;
         const { tab } = this.state;
         if (tab === 'page') {
+            // @ts-ignore
             const id = editor.PagesApp.editableId;
             const name = $el?.find('input.name').val().trim();
+            // @ts-ignore
             id && editor.PagesApp.editPage(id, name);
         } else {
+            // @ts-ignore
             const id = editor.TemplateManager.editableId;
             const thumbnail = $el?.find('input.thumbnail').val().trim();
             const name = $el?.find('input.name').val().trim();
             const description = $el?.find('input.desc').val().trim();
             const template = $el?.find('input.template').get(0).checked;
+            // @ts-ignore
             id && editor.TemplateManager.handleEdit({ id, thumbnail, name, description, template });
         }
         editor.Modal.close();
     }
 
-    handleThumbnail(e) {
+    handleThumbnail(_e: CustomEvent) {
         const { editor, $el, opts } = this;
         editor.runCommand('take-screenshot', {
-            clb(dataUrl) {
+            clb(dataUrl: string) {
                 $el?.find('img').attr('src', dataUrl);
                 opts.onThumbnail(dataUrl, $el?.find('input.thumbnail'));
             }
         })
     }
 
-    handleThumbnailInput(e) {
+    handleThumbnailInput(e: CustomEvent) {
+        // @ts-ignore
         this.$el?.find('img').attr('src', e.target.value.trim());
     }
 
@@ -75,32 +81,36 @@ export default class SettingsApp extends UI {
         if (loading) return opts.loader || '<div>Loading settings...</div>';
 
         if (tab === 'page') {
+            // @ts-ignore
             const page = pm.get(editor.PagesApp.editableId);
+            // @ts-ignore
             const value = page?.get('name') || page?.id || '';
             return `<label for="name">
-                    ${editor.I18n.t('grapesjs-project-manager.settings.labels.name')}
+                    ${editor.I18n.t('presentation-manager.settings.labels.name')}
                 </label>
                 <div class="flex-row">
                     <input 
                         class="name tm-input" 
                         value="${value}" 
-                        placeholder="${editor.I18n.t('grapesjs-project-manager.settings.placeholders.name')}"/>
+                        placeholder="${editor.I18n.t('presentation-manager.settings.placeholders.name')}"/>
                 </div>`
         } else {
+            // @ts-ignore
             const clb = site => site.id === editor.TemplateManager.editableId;
+            // @ts-ignore
             const site = editor.TemplateManager.allSites.find(clb);
             return `<div class="${pfx}tip-about ${pfx}four-color">
-                    ${editor.I18n.t('grapesjs-project-manager.settings.help')}
+                    ${editor.I18n.t('presentation-manager.settings.help')}
                 </div>
                 <label for="thumbnail">
-                    ${editor.I18n.t('grapesjs-project-manager.settings.labels.thumbnail')}
+                    ${editor.I18n.t('presentation-manager.settings.labels.thumbnail')}
                 </label>
                 <div class="flex-row">
                     <input 
                         id="thumbnail" 
                         class="thumbnail tm-input" 
                         value="${site?.thumbnail || ''}" 
-                        placeholder="${editor.I18n.t('grapesjs-project-manager.settings.placeholders.thumbnail')}"
+                        placeholder="${editor.I18n.t('presentation-manager.settings.placeholders.thumbnail')}"
                     />
                 </div>
                 <div class="flex-row" style="margin-bottom:15px;">
@@ -108,35 +118,35 @@ export default class SettingsApp extends UI {
                         <img src="${site?.thumbnail || ''}" alt="screenshot" />
                     </div>
                     <button id="generate" class="primary-button">
-                        ${editor.I18n.t('grapesjs-project-manager.settings.generate')}
+                        ${editor.I18n.t('presentation-manager.settings.generate')}
                     </button>
                 </div>
                 <label for="name">
-                    ${editor.I18n.t('grapesjs-project-manager.settings.labels.name')}
+                    ${editor.I18n.t('presentation-manager.settings.labels.name')}
                 </label>
                 <div class="flex-row">
                     <input 
                         id="name" 
                         class="name tm-input" 
                         value="${site?.name || ''}" 
-                        placeholder="${editor.I18n.t('grapesjs-project-manager.settings.placeholders.name')}"
+                        placeholder="${editor.I18n.t('presentation-manager.settings.placeholders.name')}"
                     />
                 </div>
                 <label for="desc">
-                    ${editor.I18n.t('grapesjs-project-manager.settings.labels.description')}
+                    ${editor.I18n.t('presentation-manager.settings.labels.description')}
                 </label>
                 <div class="flex-row">
                     <input 
                         id="desc" 
                         class="desc tm-input" 
                         value="${site?.description || ''}" 
-                        placeholder="${editor.I18n.t('grapesjs-project-manager.settings.placeholders.description')}"
+                        placeholder="${editor.I18n.t('presentation-manager.settings.placeholders.description')}"
                     />
                 </div>
                 <div class="flex-row group">
                     <input id="template" class="template" type="checkbox" ${site?.template ? 'checked' : ''}/>
                     <label for="template">
-                        ${editor.I18n.t('grapesjs-project-manager.settings.labels.template')}
+                        ${editor.I18n.t('presentation-manager.settings.labels.template')}
                     </label>
                 </div>`
         }
@@ -155,7 +165,7 @@ export default class SettingsApp extends UI {
                 </div>
                 <div class="flex-row">
                     <button id="save" class="primary-button">
-                        ${editor.I18n.t('grapesjs-project-manager.settings.save')}
+                        ${editor.I18n.t('presentation-manager.settings.save')}
                     </button>
                 </div>
             </div>`);

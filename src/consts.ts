@@ -8,23 +8,23 @@ export const storageIDB = 'indexeddb',
         isTemplate: false,
         description: 'No description',
 
-        setId(id) {
+        setId(id: string) {
             this.currentId = id;
         },
 
-        setName(name) {
+        setName(name: string) {
             this.currentName = name;
         },
 
-        setThumbnail(thumbnail) {
+        setThumbnail(thumbnail: string) {
             this.currentThumbnail = thumbnail;
         },
 
-        setIsTemplate(isTemplate) {
+        setIsTemplate(isTemplate: boolean) {
             this.isTemplate = !!isTemplate;
         },
 
-        setDescription(description) {
+        setDescription(description: string) {
             this.description = description;
         },
     };

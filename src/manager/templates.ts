@@ -1,10 +1,12 @@
-import ago from '../utils/timeago';
-import UI from '../utils/ui';
-import objSize from '../utils/objsize';
-import { sortByDate, sortByName, sortByPages, sortBySize, matchText } from '../utils/sort';
+import ago from '@/utils/timeago';
+import UI from '@/utils/ui';
+import objSize from '@/utils/objsize';
+import { sortByDate, sortByName, sortByPages, sortBySize, matchText } from '@/utils/sort';
+import { Editor } from 'grapesjs';
 
 export default class TemplateManager extends UI {
-    constructor(editor, opts = {}) {
+
+    constructor(editor: Editor, opts = {}) {
         super(editor, opts);
         this.handleSort = this.handleSort.bind(this);
         this.handleFilterInput = this.handleFilterInput.bind(this);
@@ -49,6 +51,7 @@ export default class TemplateManager extends UI {
         });
 
         /* Fetch sites from storage API */
+        // @ts-ignore
         const sites = await cs.loadAll();
         /* Set sites and turn off loading state */
         setState({
@@ -57,19 +60,19 @@ export default class TemplateManager extends UI {
         });
     }
 
-    handleFilterInput(e) {
+    handleFilterInput(e: any) {
         this.setState({
             filterText: e.target.value.trim()
         });
     }
 
-    handleNameInput(e) {
+    handleNameInput(e: any) {
         this.setStateSilent({
             nameText: e.target.value.trim()
         })
     }
 
-    handleSort(e) {
+    handleSort(e: any) {
         const { sortOrder } = this.state;
         if (e.target && e.target.dataset) {
             this.setState({
@@ -80,8 +83,10 @@ export default class TemplateManager extends UI {
         }
     }
 
-    handleTabs(e) {
+    // @ts-ignore
+    handleTabs(e: any) {
         const { target } = e;
+        // @ts-ignore
         const { $el, pfx, $ } = this;
         $el.find(`.${pfx}tablinks`).removeClass('active');
         $(target).addClass('active');
@@ -92,80 +97,92 @@ export default class TemplateManager extends UI {
         }
     }
 
-    async handleOpen(e) {
+    async handleOpen(_e: any) {
         const { editor, cs } = this;
         const { projectId } = this.state;
+        // @ts-ignore
         if (!projectId || projectId === cs.currentId) {
+            // @ts-ignore
             this.opts.currentPageOpen()
             return;
         }
+        // @ts-ignore
         cs.setId(projectId);
+        // @ts-ignore
         const res = await editor.load();
-        cs.setName(res.name);
-        cs.setThumbnail(res.thumbnail || '');
-        cs.setIsTemplate(res.template);
-        cs.setDescription(res.description || 'No description');
+        cs?.setName(res.name);
+        cs?.setDirectives(res.directives);
+        cs?.setTheme(res.theme)
+        cs?.setThumbnail(res.thumbnail || '');
+        cs?.setIsTemplate(res.template);
+        cs?.setDescription(res.description || 'No description');
         editor.Modal.close();
     }
 
-    async handleCreate(e) {
+    async handleCreate(_e: any) {
         const { editor, cs } = this;
         const { projectId, nameText } = this.state;
-        const id = editor.runCommand('get-uuidv4');
+        const id = editor.runCommand('get-ulid');
         const name = nameText || 'New-' + id.substring(0, 8);
         const def = {
             id,
             name,
             template: false,
             thumbnail: '',
+            theme: '',
+            directives: '',
             styles: '[]',
             description: 'No description',
-            pages: `[{"id": "${crypto.randomUUID().substring(0, 13)}", "name": "index"}]`,
-            styles: '[]',
+            pages: `[{"id": "${editor.runCommand('get-ulid')}", "name": "index"}]`,
             assets: '[]'
         };
         if (!projectId) {
-            cs.setId(id);
-            await cs.store(def);
-            cs.setIsTemplate(false);
+            cs?.setId(id);
+            await cs?.store(def, {});
+            cs?.setIsTemplate(false);
+            // @ts-ignore
             const res = await editor.load();
-            cs.setId(res.id);
-            cs.setName(res.name);
-            cs.setThumbnail(res.thumbnail || '');
-            cs.setDescription(res.description || 'No description');
+            cs?.setId(res.id);
+            cs?.setName(res.name);
+            cs?.setThumbnail(res.thumbnail || '');
+            cs?.setDescription(res.description || 'No description');
             editor.Modal.close();
         } else {
-            cs.setId(projectId);
-            cs.setIsTemplate(false);
+            cs?.setId(projectId);
+            cs?.setIsTemplate(false);
+            // @ts-ignore
             const res = await editor.load();
-            cs.setId(id);
-            cs.setName(name);
-            cs.setThumbnail(res.thumbnail || '');
-            cs.setDescription(res.description || 'No description');
+            cs?.setId(id);
+            cs?.setName(name);
+            cs?.setThumbnail(res.thumbnail || '');
+            cs?.setDescription(res.description || 'No description');
             editor.Modal.close();
         }
     }
 
-    openEdit(e) {
+    openEdit(e: CustomEvent) {
         const { editor, setStateSilent } = this;
         setStateSilent({
+            // @ts-ignore
             editableProjectId: e.currentTarget.dataset.id
         });
         editor.Modal.close();
+        // @ts-ignore
         editor.SettingsApp.setTab('project');
         editor.runCommand('open-settings');
     }
 
-    handleEdit(data) {
-        this.opts.onUpdateAsync(this.cs.update({ ...data, updated_at: Date.now() }));
+    handleEdit(data: any) {
+        this.opts.onUpdateAsync(this.cs?.update({ ...data, updated_at: Date.now() }));
     }
 
-    async handleDelete(e) {
+    async handleDelete(e: CustomEvent) {
         const { cs, setState, opts } = this;
         if (opts.confirmDeleteProject()) {
+            // @ts-ignore
             const res = await opts.onDeleteAsync(cs.delete(e.currentTarget.dataset.id));
             opts.onDelete(res);
-            const sites = await cs.loadAll();
+            const sites = await cs?.loadAll();
             setState({ sites });
         }
     }
@@ -174,9 +191,9 @@ export default class TemplateManager extends UI {
         const { sites, tab, filterText, loading, sortBy, sortOrder } = this.state;
         const { pfx, opts, cs, editor } = this;
 
-        if (loading) return opts.loader || '<div>Loading sites...</div>';
+        if (loading) return opts.loader || '<div>Loading presentations...</div>';
 
-        if (!sites.length) return opts.nosites || '<div>No Sites</div>';
+        if (!sites.length) return opts.nosites || '<div>No Presentations</div>';
 
         let order
         if (sortBy === 'id') {
@@ -191,7 +208,7 @@ export default class TemplateManager extends UI {
 
         const sortedSites = sites.sort(order);
 
-        let matchingSites = sortedSites.filter(site => {
+        let matchingSites = sortedSites.filter((site: { id: any; name: any; template: any; }) => {
             // No search query. Show all
             if (!filterText && tab === 'pages') {
                 return true;
@@ -213,7 +230,7 @@ export default class TemplateManager extends UI {
             // no match!
             return false;
         })
-            .map((site, i) => {
+            .map((site: any, i: number) => {
                 const {
                     id,
                     name,
@@ -227,12 +244,12 @@ export default class TemplateManager extends UI {
                 const pages = typeof _pages === 'string' ? JSON.parse(_pages) : _pages;
                 const time = updated_at ? ago(updated_at) : 'NA';
                 const createdAt = created_at ? ago(created_at) : 'NA';
-                const pageNames = pages.map(page => page.name).join(', ');
+                const pageNames = pages.map((page: any) => page.name).join(', ');
                 return `<div 
-                    class="site-wrapper ${cs.currentId === id ? 'open' : ''}" 
+                    class="site-wrapper ${cs?.currentId === id ? 'open' : ''}" 
                     key="${i}" 
                     data-id="${id}" 
-                    title="${editor.I18n.t('grapesjs-project-manager.templates.titles.open')}">
+                    title="${editor.I18n.t('presentation-manager.templates.titles.open')}">
                         <div class="site-screenshot">
                             <img src="${thumbnail}" alt="" />
                         </div>
@@ -255,8 +272,8 @@ export default class TemplateManager extends UI {
                             ${size.toFixed(2)} KB
                         </div>` : ''}
                         <div class="site-actions">
-                            <i class="${pfx}caret-icon fa fa-hand-pointer-o edit" title="${editor.I18n.t('grapesjs-project-manager.templates.titles.edit')}" data-id="${id}"></i>
-                            ${!(cs.currentId === id) ? `<i class="${pfx}caret-icon fa fa-trash-o delete" title="${editor.I18n.t('grapesjs-project-manager.templates.titles.delete')}" data-id="${id}"></i>` : ''}
+                            <i class="${pfx}caret-icon fa fa-hand-pointer-o edit" title="${editor.I18n.t('presentation-manager.templates.titles.edit')}" data-id="${id}"></i>
+                            ${!(cs?.currentId === id) ? `<i class="${pfx}caret-icon fa fa-trash-o delete" title="${editor.I18n.t('presentation-manager.templates.titles.delete')}" data-id="${id}"></i>` : ''}
                         </div>
                     </div>`;
             }).join('\n');
@@ -279,27 +296,27 @@ export default class TemplateManager extends UI {
             `<div  class="flex-row">
                 <input 
                     class="search tm-input" 
-                    placeholder="${editor.I18n.t('grapesjs-project-manager.templates.search')}"
+                    placeholder="${editor.I18n.t('presentation-manager.templates.search')}"
                 />
                 <button id="open" class="primary-button">
-                    ${editor.I18n.t('grapesjs-project-manager.templates.open')}
+                    ${editor.I18n.t('presentation-manager.templates.open')}
                 </button>
             </div>` :
             `<div class="${this.pfx}tip-about ${this.pfx}four-color">
-                ${editor.I18n.t('grapesjs-project-manager.templates.help')}
+                ${editor.I18n.t('presentation-manager.templates.help')}
             </div>
             <div class="flex-row">
                 <input 
                     class="name tm-input" 
-                    placeholder="${editor.I18n.t('grapesjs-project-manager.templates.new')}"
+                    placeholder="${editor.I18n.t('presentation-manager.templates.new')}"
                 />
                 <button id="create" class="primary-button">
-                    ${editor.I18n.t('grapesjs-project-manager.templates.create')}
+                    ${editor.I18n.t('presentation-manager.templates.create')}
                 </button>
             </div>`;
     }
 
-    renderThumbnail(thumbnail, page) {
+    renderThumbnail(thumbnail: any, page: any) {
         const def = `<img src="${thumbnail}" alt="" />`;
         if (thumbnail) return def;
         else if (page.html) return `<svg xmlns="http://www.w3.org/2000/svg" class="template-preview" viewBox="0 0 1300 1100" width="99%" height="220">
@@ -320,9 +337,10 @@ export default class TemplateManager extends UI {
         const name = this.$el?.find('input.name');
         this.setStateSilent({ projectId: '' });
         if (sites) {
-            sites.on('click', e => {
+            sites.on('click', (e: CustomEvent) => {
                 sites.removeClass('selected');
                 this.$(e.currentTarget).addClass('selected');
+                // @ts-ignore
                 this.setStateSilent({ projectId: e.currentTarget.dataset.id });
             });
         }
@@ -353,10 +371,10 @@ export default class TemplateManager extends UI {
                 <div class="contents">
                     <div class="${pfx}tab">
                         <button id="pages" class="${pfx}tablinks ${tab === 'pages' ? 'active' : ''}">
-                            ${editor.I18n.t('grapesjs-project-manager.templates.all')}
+                            ${editor.I18n.t('presentation-manager.templates.all')}
                         </button>
                         <button id="templates" class="${pfx}tablinks ${tab === 'templates' ? 'active' : ''}"">
-                            ${editor.I18n.t('grapesjs-project-manager.templates.templates')}
+                            ${editor.I18n.t('presentation-manager.templates.templates')}
                         </button>
                     </div>
                     <div id="tm-actions">
@@ -366,9 +384,9 @@ export default class TemplateManager extends UI {
                         <div
                             class="site-screenshot-header header"
                             data-sort="id"
-                            title="${editor.I18n.t('grapesjs-project-manager.templates.titles.info')}"
+                            title="${editor.I18n.t('presentation-manager.templates.titles.info')}"
                         >
-                            ${editor.I18n.t('grapesjs-project-manager.templates.info')}
+                            ${editor.I18n.t('presentation-manager.templates.info')}
                         </div>
                         <div
                             class="site-info header"
@@ -377,37 +395,37 @@ export default class TemplateManager extends UI {
                         <div
                             class="site-update-time header"
                             data-sort="updated_at"
-                            title="${editor.I18n.t('grapesjs-project-manager.templates.titles.updated')}"
+                            title="${editor.I18n.t('presentation-manager.templates.titles.updated')}"
                         >
-                            ${editor.I18n.t('grapesjs-project-manager.templates.updated')}
+                            ${editor.I18n.t('presentation-manager.templates.updated')}
                         </div>
                         <div
                             class="site-pages header"
                             data-sort="pages"
-                            title="${editor.I18n.t('grapesjs-project-manager.templates.titles.pages')}"
+                            title="${editor.I18n.t('presentation-manager.templates.titles.pages')}"
                         >
-                            ${editor.I18n.t('grapesjs-project-manager.templates.pages')}
+                            ${editor.I18n.t('presentation-manager.templates.pages')}
                         </div>
                         <div
                             class="site-create-time header"
                             data-sort="created_at"
-                            title="${editor.I18n.t('grapesjs-project-manager.templates.titles.created')}"
+                            title="${editor.I18n.t('presentation-manager.templates.titles.created')}"
                         >
-                            ${editor.I18n.t('grapesjs-project-manager.templates.created')}
+                            ${editor.I18n.t('presentation-manager.templates.created')}
                         </div>
                         ${opts.size ? `<div
                             class="site-size header"
                             data-sort="size"
-                            title="${editor.I18n.t('grapesjs-project-manager.templates.titles.size')}"
+                            title="${editor.I18n.t('presentation-manager.templates.titles.size')}"
                         >
-                            ${editor.I18n.t('grapesjs-project-manager.templates.size')}
+                            ${editor.I18n.t('presentation-manager.templates.size')}
                         </div>` : ''}
                         <div
                             class="site-actions header"
                             data-sort="id"
-                            title="${editor.I18n.t('grapesjs-project-manager.templates.titles.actions')}"
+                            title="${editor.I18n.t('presentation-manager.templates.titles.actions')}"
                         >
-                            ${editor.I18n.t('grapesjs-project-manager.templates.actions')}
+                            ${editor.I18n.t('presentation-manager.templates.actions')}
                         </div>
                     </div>
                     <div id="site-list">

@@ -1,66 +1,139 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>BuzzCasting Presentation Manager</title>
+		<link
+			href="https://unpkg.com/grapesjs/dist/css/grapes.min.css"
+			rel="stylesheet"
+		/>
+		<link
+			href="https://unpkg.com/grapesjs-tailwind-typeahead/dist/grapesjs-tailwind-typeahead.css"
+			rel="stylesheet"
+		/>
+		<script src="https://unpkg.com/grapesjs"></script>
+		<script src="https://unpkg.com/grapesjs-tailwind-typeahead"></script>
+		<script type="module">
+			import presentation from "./src/index.ts"
+			window.presentationManager = presentation
+		</script>
+		<style>
+			body,
+			html {
+				height: 100%;
+				margin: 0;
+			}
+		</style>
+	</head>
 
-<head>
-    <meta charset="utf-8">
-    <title>Grapesjs Project Manager</title>
-    <link href="https://unpkg.com/grapesjs/dist/css/grapes.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="dist/grapesjs-project-manager.min.css">
-    <script src="https://unpkg.com/grapesjs"></script>
-    <style>
-        body,
-        html {
-            height: 100%;
-            margin: 0;
-        }
-    </style>
-</head>
+	<body>
+		<div
+			id="editor"
+			style="height: 0px; overflow: hidden"
+		>
+			<div style="margin: 100px 100px 25px; padding: 25px; font: caption">
+				This is a demo content from _index.html. You can use this template file for development purpose. It won't be stored in your git repository
+			</div>
+		</div>
 
-<body>
+		<script type="text/javascript">
+			const escapeName = (name) => `${name}`.trim().replace(/([^a-z0-9\[\]\w-:/]+)/gi, "-")
 
-    <div id="gjs" style="height:0px; overflow:hidden">
-        <div style="margin:100px 100px 25px; padding:25px; font:caption">
-            This is a demo content from _index.html. You can use this template file for
-            development purpose. It won't be stored in your git repository
-        </div>
-    </div>
+			setTimeout(() => {
+				window.editor = grapesjs.init({
+					height: "100%",
+					container: "#editor",
+					showOffsets: true,
+					noticeOnUnload: false,
+					pageManager: true,
+					deviceManager: {
+						default: "",
+						devices: [
+							{
+								id: "desktop",
+								name: "desktop",
+								width: ""
+							},
+							{
+								id: "sm",
+								name: "sm: 640px",
+								width: "640px",
+								widthMedia: "640px",
+								maxWidth: "768px"
+							},
+							{
+								id: "md",
+								name: "md: 768px",
+								width: "768px",
+								widthMedia: "768px"
+							},
+							{
+								id: "lg",
+								name: "lg: 1024px",
+								width: "1024px",
+								widthMedia: "1024px"
+							},
+							{
+								id: "xl",
+								name: "xl: 1280px",
+								width: "1280px",
+								widthMedia: "1280px"
+							},
+							{
+								id: "2xl",
+								name: "2xl: 1536px",
+								width: "1536px",
+								widthMedia: "1536px"
+							}
+						]
+					},
+					storageManager: {
+						type: "indexeddb"
+					},
+					styleManager: {
+						custom: true
+					},
+					selectorManager: {
+						escapeName,
+						componentFirst: true
+					},
+					plugins: ["presentationManager", "grapesjsTailwindTypeahead"],
+					pluginsOpts: {
+						presentationManager: {
+							/* Test here your options  */
+							dbName: "bayer"
+						},
+						grapesjsTailwindTypeahead: {}
+					}
+				})
 
+				const pn = editor.Panels
+				pn.addButton("options", {
+					id: "open-templates",
+					className: "fa fa-file-powerpoint-o",
+					attributes: {
+						title: "Open Templates"
+					},
+					command: "open-templates" //Open modal
+				})
 
-    <script type="text/javascript">
-        window.editor = grapesjs.init({
-            height: '100%',
-            container: '#gjs',
-            showOffsets: true,
-            fromElement: true,
-            noticeOnUnload: false,
-            pageManager: true,
-            storageManager: {
-                type: 'indexeddb'
-            },
-            plugins: ['grapesjs-project-manager'],
-            pluginsOpts: {
-                'grapesjs-project-manager': { /* Test here your options  */ }
-            }
-        });
-        const pn = editor.Panels;
-        pn.addButton('options', {
-            id: 'open-templates',
-            className: 'fa fa-folder-o',
-            attributes: {
-                title: 'Open Templates'
-            },
-            command: 'open-templates', //Open modal 
-        });
-        pn.addButton('views', {
-            id: 'open-pages',
-            className: 'fa fa-file-o',
-            attributes: {
-                title: 'Take Screenshot'
-            },
-            command: 'open-pages',
-            togglable: false
-        });
-    </script>
-</body>
-
+				pn.addButton("options", {
+					id: "open-import",
+					command: "open-import",
+					label: `<svg style="display: block; max-width: 22px"' viewBox="0 0 24 24">
+            <path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+        </svg>`
+				})
+				pn.addButton("views", {
+					id: "open-pages",
+					className: "fa fa-picture-o",
+					attributes: {
+						title: "Take Screenshot"
+					},
+					command: "open-pages",
+					togglable: false
+				})
+			}, 200)
+		</script>
+	</body>
 </html>

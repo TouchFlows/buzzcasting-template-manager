@@ -1,7 +1,9 @@
-import UI from '../utils/ui';
+import { Editor } from 'grapesjs';
+import UI from '@/utils/ui';
+import { ulid } from 'ulid';
 
 export default class PagesApp extends UI {
-    constructor(editor, opts = {}) {
+    constructor(editor: Editor, opts = {}) {
         super(editor, opts);
         this.addPage = this.addPage.bind(this);
         this.selectPage = this.selectPage.bind(this);
@@ -11,6 +13,7 @@ export default class PagesApp extends UI {
         this.openEdit = this.openEdit.bind(this);
 
         /* Set initial app state */
+        // @ts-ignore
         this.state = {
             editablePageId: '',
             isShowing: true,
@@ -42,62 +45,69 @@ export default class PagesApp extends UI {
         });
     }
 
-    isSelected(page) {
+    isSelected(page: any) {
+        // @ts-ignore
         return this.pm.getSelected().id === page.id;
     }
 
-    selectPage(e) {
+    selectPage(e: any) {
         this.pm.select(e.currentTarget.dataset.key);
         this.update();
     }
 
-    removePage(e) {
+    removePage(e: any) {
+        // @ts-ignore
         if (this.opts.confirmDeleteProject()) {
             this.pm.remove(e.currentTarget.dataset.key);
             this.update();
         }
     }
 
-    openEdit(e) {
+    openEdit(e: any) {
         const { editor } = this;
         this.setStateSilent({
             editablePageId: e.currentTarget.dataset.key
         });
         editor.Modal.close();
+        // @ts-ignore
         editor.SettingsApp.setTab('page');
         editor.runCommand('open-settings');
     }
 
-    editPage(id, name) {
+    editPage(id: string, name: string) {
         const currentPage = this.pm.get(id);
-        currentPage?.set('name', name);
+        currentPage.set('name', name);
         this.update()
     }
 
     addPage() {
         const { pm } = this;
+        // @ts-ignore
         const { nameText } = this.state
         if (!nameText) return;
         pm.add({
+            id: ulid(),
             name: nameText,
             component: ''
         });
         this.update();
     }
 
-    handleNameInput(e) {
+    handleNameInput(e: any) {
         this.setStateSilent({
             nameText: e.target.value.trim()
         })
     }
 
     renderPagesList() {
+        // @ts-ignore
         const { pages, loading } = this.state;
+        // @ts-ignore
         const { opts, isSelected } = this;
 
-        if (loading) return opts.loader || '<div>Loading pages...</div>';
+        if (loading) return opts.loader || '<div>Loading slides...</div>';
 
-        return pages.map((page, i) => `<div 
+        return pages.map((page: any, i: number) => `<div 
                 data-id="${i}" 
                 data-key="${page.get('private') ? '' : (page.id || page.get('name'))}"  
                 class="page ${isSelected(page) ? 'selected' : ''}"
@@ -110,9 +120,13 @@ export default class PagesApp extends UI {
     }
 
     update() {
+        // @ts-ignore
         this.$el?.find('.pages').html(this.renderPagesList());
+        // @ts-ignore
         this.$el?.find('.page').on('click', this.selectPage);
+        // @ts-ignore
         this.$el?.find('.page-edit').on('click', this.openEdit);
+        // @ts-ignore
         this.$el?.find('.page-close').on('click', this.removePage);
     }
 
@@ -131,11 +145,11 @@ export default class PagesApp extends UI {
                     <input 
                         class="tm-input sm" 
                         type="text" 
-                        placeholder="${editor.I18n.t('grapesjs-project-manager.pages.placeholder')}" 
+                        placeholder="${editor.I18n.t('presentation-manager.pages.placeholder')}" 
                     />
                 </div>
                 <div class="add-page">
-                    ${editor.I18n.t('grapesjs-project-manager.pages.new')}
+                    ${editor.I18n.t('presentation-manager.pages.new')}
                 </div>
             </div>`);
         cont.find('.add-page').on('click', this.addPage);
@@ -145,13 +159,15 @@ export default class PagesApp extends UI {
         return cont;
     }
 
-    get findPanel() {
+    // @ts-ignore
+    get findPanel(): any {
         return this.editor.Panels.getPanel('views-container');
     }
 
     showPanel() {
         this.state.isShowing = true;
-        this.findPanel?.set('appendContent', this.render()).trigger('change:appendContent');
+        // @ts-ignore
+        this.findPanel.set('appendContent', this.render()).trigger('change:appendContent');
         this.update();
     }
 

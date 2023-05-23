@@ -1,9 +1,11 @@
-import { storageIDB, helpers } from '../consts';
+import { Editor } from 'grapesjs';
+import { storageIDB, helpers } from '@/consts';
 
-export default (editor, opts = {}) => {
-    let db;
+export default (editor: Editor, opts = {}) => {
+    let db: IDBDatabase;
     const sm = editor.StorageManager;
     const storageName = storageIDB;
+    // @ts-ignore
     const objsName = opts.objectStoreName;
 
     // Functions for DB retrieving
@@ -12,8 +14,10 @@ export default (editor, opts = {}) => {
         if (db) {
             resolve(db);
         } else {
-            const indexedDB = window.indexedDB || window.mozIndexedDB ||
-                window.webkitIndexedDB || window.msIndexedDB;
+            const indexedDB = window.indexedDB || 
+                // @ts-ignore
+                window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+            // @ts-ignore
             const request = indexedDB.open(opts.dbName, opts.indexeddbVersion);
             request.onerror = reject;
             request.onsuccess = () => {
@@ -21,7 +25,7 @@ export default (editor, opts = {}) => {
                 db.onerror = reject;
                 resolve(db);
             };
-            request.onupgradeneeded = e => {
+            request.onupgradeneeded = (_e: any) => {
                 const objs = request.result.createObjectStore(objsName, { keyPath: 'id' });
                 objs.createIndex('name', 'name', { unique: false });
             };
@@ -48,7 +52,7 @@ export default (editor, opts = {}) => {
 
         getObjectStore,
 
-        async load(keys) {
+        async load(_keys: any) {
             const objs = await getAsyncObjectStore();
             return new Promise(
                 (resolve, reject) => {
@@ -74,7 +78,7 @@ export default (editor, opts = {}) => {
             );
         },
 
-        async store(data) {
+        async store(data: any) {
             const objs = await getAsyncObjectStore();
             return new Promise(
                 (resolve, reject) => {
@@ -95,7 +99,7 @@ export default (editor, opts = {}) => {
             );
         },
 
-        async update(data) {
+        async update(data: any) {
             const { id, ..._data } = data;
             const objs = await getAsyncObjectStore();
             return new Promise(
@@ -110,7 +114,7 @@ export default (editor, opts = {}) => {
             );
         },
 
-        async delete(index) {
+        async delete(index: any) {
             const objs = await getAsyncObjectStore();
             return new Promise(
                 (resolve, reject) => {
