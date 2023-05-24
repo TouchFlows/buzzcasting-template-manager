@@ -129,8 +129,12 @@ export default class TemplateManager extends UI {
             name,
             template: false,
             thumbnail: '',
-            theme: '',
-            directives: '',
+            // @ts-ignore
+            theme: editor.getModel().get('theme') || {theme:{}},
+            directives: 
+`@tailwind base;
+@tailwind components;
+@tailwind utilities;`,
             styles: '[]',
             description: 'No description',
             pages: `[{"id": "${editor.runCommand('get-ulid')}", "name": "index"}]`,
